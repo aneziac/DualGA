@@ -1,5 +1,8 @@
 from dataclasses import dataclass
 from typing import Literal
+import torch
+import numpy as np
+import numpy.typing as npt
 
 
 @dataclass
@@ -25,3 +28,6 @@ class ExperimentResult:
     z_scores: list[float]
     mean_dgs: list[float]
     mean_kls: list[float]
+
+
+WatermarkResult = tuple[torch.Tensor, npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]

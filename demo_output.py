@@ -16,7 +16,7 @@ def generate_normal(model, tokenizer, input_ids, max_new_tokens):
             outputs = model(input_ids=generated)
             logits = outputs.logits[:, -1, :]
             probs = torch.softmax(logits, dim=-1)
-            next_token = torch.multinomial(probs, num_samples=1)
+            next_token = torch.multinomial(probs.cpu(), num_samples=1).to(generated.device)
             generated = torch.cat([generated, next_token], dim=-1)
 
             if next_token.item() == tokenizer.eos_token_id:
@@ -31,7 +31,7 @@ def highlight_tokens(tokenizer, tokens, prompt_length, gamma, vocab_size):
 
     for i in range(prompt_length, len(tokens)):
         if i == prompt_length:
-            continue  # Skip first generated token (no previous context)
+            continue
 
         prev_token = tokens[i - 1]
         current_token = tokens[i]
@@ -52,14 +52,14 @@ def main():
     console = Console()
 
     # Setup
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
     model_name = "facebook/opt-350m"
 
     console.print(f"Loading {model_name}...", style="blue")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device_map="auto")
+    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
 
-    prompt = "The future of artificial intelligence is"
+    prompt = "Once upon a time"
     input_ids = tokenizer.encode(prompt, return_tensors="pt").to(device)
     prompt_length = input_ids.shape[1]
     max_new_tokens = 100

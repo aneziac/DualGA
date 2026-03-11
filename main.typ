@@ -38,9 +38,9 @@
 
 - "Gumbel Softmax" Scheme --- _Aaronson (2023); Christ et al. (2023)_
 // U
-- Partition vocabulary vocabulary and distort probabilities --- _Kirchenbauer et al. (2023)_
+- Partition vocabulary and distort probabilities --- _Kirchenbauer et al. (2023)_
 - Unique assignments of pseudorandom functions per token via secret keys --- _Kuditipudi et al. (2023)_
-- Curve Pareto optimum against log perplexity --- _Wouters (2023)_
+// - Curve Pareto optimum against log perplexity --- _Wouters (2023)_
 
 #v(2em)
 
@@ -48,7 +48,7 @@ Key Question: _What is the minimal price for a watermarking algorithm to attain 
 
 == Model Setup
 
-A language model (LM) $cal(M)$ is a function that treats both a prompt $x$ and previous $t - 1$ tokens $y_1, dots, y_(t - 1)$ as _context_ $bu(y)_[t - 1]$ and maps this to a probability vector $bu(p)_t in Delta (cal(V))$ as a prediction, where $Delta (cal(V))$ denotes the set of all probability distributions over a vocabulary $cal(V)$.
+A language model (LM) $cal(M)$ is a function that treats both a prompt $bu(x)$ and previous $t - 1$ tokens $y_1, dots, y_(t - 1)$ as _context_ $bu(y)_[t - 1]$ and maps this to a probability vector $bu(p)_t in Delta (cal(V))$ as a prediction, where $Delta (cal(V))$ denotes the set of all probability distributions over a vocabulary $cal(V)$.
 
 The probability vector is obtained by applying softmax to a logit vector $bu(l)_t = (l_(t, 1), dots, l_(t, cal(V)))$:
 $
@@ -69,10 +69,9 @@ We want to formalize this tradeoff, clearly defining the classes of error at pla
 == Classes of Error
 
 Let $cal(K)$ be the space of all possible detection keys $K$, and $cal(T)$ be the space of token sequences $bu(y)_[t] = y_1, dots, y_t$.
+Define a *watermarked model* $cal(L)'$ as consisting of an algorithm & key pair $(cal(A), cal(K))$ where $cal(A) : cal(K) times cal(T) -> Delta (cal(V))$, i.e., we get a PMF over $cal(V)$.
 
-Define a *watermarked model* $cal(L)'$ as consisting of an algorithm & key pair $(cal(A), cal(K))$ where $cal(A) : K times cal(T) -> Delta (cal(V))$, i.e., we get a PMF over $cal(V)$.
-
-A *detection procedure* $cal(D) : K times cal(T) -> {0, 1}$ then determines whether the text came from $cal(L)'$.
+A *detection procedure* $cal(D) : cal(K) times cal(T) -> {0, 1}$ then determines whether the text came from $cal(L)'$.
 
 Then the two types of errors are (for some prompt $bu(x) = bu(y)_[n < t]$):
 $
@@ -264,29 +263,15 @@ simpler by
   ],
 )
 
-== Algorithm Analysis
+= Experiments
 
-#text(18pt)[
-  We assume that
-  1. Green word probabilities are i.i.d. random variables for all $t in [T]$
-  2. The optimal dual variable $lambda^*$ is bounded: $lambda^* in [0, M]$, and $lambda$ starts and ends in this range.
+== Setup
 
-  Then with $eta = Theta(1 / sqrt(T))$, we have that:
+#v(4.5em)
 
-  #thm[
-    The previous algorithm satisfies
-    $
-      1 / T sum_(t = 1)^T EE[D_bu(p)(bu(q)_t (delta_t))]
-      <= EE["OPT"(Delta)] + O(1 / sqrt(T))
-    $
-    and
-    $
-      1 / T sum_(t = 1)^T EE["DG"_bu(p) (bu(q)_t (delta_t))] >= Delta - O(1 / sqrt(T)).
-    $
-  ][]
-]
+The authors use a LLaMa-7B model, while I used a 350M model due to limited compute resources.
 
-= Experimental Results
+In terms of datasets, both of our implementations use the C4 dataset of English language texts for prompt samples.
 
 == Kirchenbauer Implementation
 
@@ -343,10 +328,6 @@ simpler by
           break
   ```
 )]
-
-== LLM Responses Comparison
-
-
 
 == Dual GA Implementation
 
@@ -450,5 +431,24 @@ simpler by
     ]
   )
 ]
+
+== Limitations
+
+- We assumed here that green list partitions are independent across positions, but since we only have dependence on our fixed seed $k$ and the previous token, this is not necessarily true for a model that repeatedly generates the same token
+
+- Robustness: what if someone modifies the watermarked text after generation?
+  - The authors show that good enough $p$-values are still obtained in the algorithm for up to half the text being deleted
+
+- Distinguishability: as mentioned at the start, making a perturbation to the underlying distribution is inherently limiting, vs. e.g. the Scott Aaronson approach
+
+== Further Research
+
+- Replacement of KL divergence?
+  - While mathematically convenient, its generality possibly implies an information theoretic measure more specific to text might be better
+
+#v(3em)
+
+- What if have multiple LLMs with specified parameters?
+  - Can we modify the algorithm to track which individual modified a particular piece of text?
 
 = Questions?

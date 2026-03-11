@@ -26,15 +26,13 @@ def load_prompts(n_prompts: int, min_prompt_tokens: int, tokenizer: PreTrainedTo
 
 
 def run_experiment(model_name: str, n_prompts: int, max_new_tokens: int, min_prompt_tokens: int) -> None:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
     print(f"Using device: {device}")
 
     # Load model
     print(f"Loading model: {model_name}")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name, torch_dtype=torch.float16, device_map="auto"
-    )
+    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
     model.eval()
 
     prompts = load_prompts(n_prompts, min_prompt_tokens, tokenizer)

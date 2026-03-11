@@ -70,7 +70,7 @@ def generate_srl(
             kl_values.append(kl_t)
 
             # 5. Sample from watermarked distribution
-            next_token = torch.multinomial(wm_probs.unsqueeze(0), num_samples=1)
+            next_token = torch.multinomial(wm_probs.unsqueeze(0).cpu(), num_samples=1).to(device)
             generated = torch.cat([generated, next_token], dim=-1)
             next_input = next_token
 
@@ -149,7 +149,7 @@ def generate_dualga(
             kl_values.append(kl_t)
 
             # 6. Sample from watermarked distribution
-            next_token = torch.multinomial(wm_probs.unsqueeze(0), num_samples=1)
+            next_token = torch.multinomial(wm_probs.unsqueeze(0).cpu(), num_samples=1).to(device)
             generated = torch.cat([generated, next_token], dim=-1)
             next_input = next_token
 
@@ -160,8 +160,8 @@ def generate_dualga(
             # DG_t as a function of delta and g.
             # Not sure if this is explicitly given in the paper but it's in their code
             g_val = g.item()
-            delta_tensor = torch.tensor(delta_t)
-            g_tensor = torch.tensor(g_val)
+            delta_tensor = torch.tensor(delta_t, device=device)
+            g_tensor = torch.tensor(g_val, device=device)
             denom = g_tensor * torch.exp(delta_tensor) - g_tensor + 1
             dg_closed = (1 - g_tensor) * (1 - 1 / denom)
 

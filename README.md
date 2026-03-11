@@ -7,7 +7,8 @@ The slides are located in `main.pdf` and the original paper (from arxiv) is loca
 I forgot we needed to include a discussion section originally, so I added one after giving the presentation.
 
 This repo is a fork of their original repo, so that I could reference their code while recreating some of their results.
-Unfortunately, they didn't include any notebooks replicating their figures, just their underlying algorithms.
+The code of the authors is located in `./experiments/` and `./WatermarkAlgorithm/`, while my code consists of the python files in the root.
+Unfortunately, the authors didn't include any notebooks replicating their figures, just their underlying algorithms.
 
 So I replicated the first figure from scratch in `./figure1_replication.py`, producing
 

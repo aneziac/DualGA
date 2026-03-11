@@ -451,4 +451,13 @@ In terms of datasets, both of our implementations use the C4 dataset of English 
 - What if have multiple LLMs with specified parameters?
   - Can we modify the algorithm to track which individual modified a particular piece of text?
 
+== Code Link
+
+#align(center + horizon)[
+  #text(40pt)[
+    https://github.com/aneziac/DualGA
+  ]
+]
+
+
 = Questions?
